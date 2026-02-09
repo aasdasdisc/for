@@ -387,7 +387,7 @@ If you use this platform in academic work:
 ```
 @software{traffic_api_platform,
   title  = {Web API Test Platform for Traffic Simulation},
-  author = {Ahmed Albreem},
+  author = {Ahmed M. S. Albreem},
   year   = {2026}
 }
 ```
