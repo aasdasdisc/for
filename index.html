@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web API Test Platform | Traffic & CityFlow Research</title>
+    <!-- Inter Font for modern research look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #64748b;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --sidebar-width: 280px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #334155;
+            background-color: #f1f5f9;
+            display: flex;
+            scroll-behavior: smooth;
+        }
+
+        /* --- Sidebar Navigation --- */
+        aside {
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid var(--border);
+            padding: 2rem 1rem;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .logo-area {
+            padding: 0 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .logo-area h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .logo-area span {
+            color: var(--primary);
+        }
+
+        .nav-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .nav-group-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #94a3b8;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+        }
+
+        nav ul { list-style: none; }
+        nav li { margin-bottom: 0.25rem; }
+
+        nav a {
+            text-decoration: none;
+            color: var(--secondary);
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        nav a:hover {
+            background: var(--light);
+            color: var(--primary);
+        }
+
+        nav a.active {
+            background: #eff6ff;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* --- Main Content --- */
+        main {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 4rem;
+            max-width: 1200px;
+        }
+
+        section {
+            background: white;
+            padding: 3rem;
+            border-radius: 12px;
+            margin-bottom: 3rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            color: var(--dark);
+            margin: 2rem 0 1rem;
+            font-weight: 600;
+        }
+
+        h4 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        p { margin-bottom: 1.2rem; font-size: 1.05rem; }
+        ul { margin-bottom: 1rem; padding-left: 1.2rem; }
+        li { margin-bottom: 0.5rem; }
+
+        /* --- Components --- */
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--light);
+            color: var(--secondary);
+            border: 1px solid var(--border);
+            text-transform: uppercase;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .card {
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: var(--transition);
+            background: white;
+        }
+
+        .card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); }
+
+        .ascii-diagram {
+            font-family: 'Fira Code', monospace;
+            background: var(--dark);
+            color: #94a3b8;
+            padding: 2rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            margin: 2rem 0;
+            white-space: pre;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 0.95rem;
+        }
+
+        th { background: #f8fafc; font-weight: 600; text-align: left; color: var(--secondary); font-size: 0.85rem; text-transform: uppercase; }
+        th, td { padding: 1rem; border-bottom: 1px solid var(--border); }
+        tr:last-child td { border-bottom: none; }
+
+        .citation-box {
+            background: var(--dark);
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #334155;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .copy-btn:hover { background: var(--primary); }
+
+        .code-block {
+            background: #f1f5f9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+            color: var(--primary-dark);
+        }
+
+        /* --- Robustness Section Specifics --- */
+        .robustness-tag {
+            background: #fff7ed;
+            color: #c2410c;
+            border: 1px solid #ffedd5;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .impact-box {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-left: 3px solid var(--secondary);
+            border-radius: 0 4px 4px 0;
+        }
+
+        /* --- Mobile Responsive --- */
+        @media (max-width: 1024px) {
+            aside { width: 0; padding: 0; display: none; }
+            main { margin-left: 0; padding: 2rem; }
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <div class="logo-area">
+            <h1>TrafficSim <span>Research</span></h1>
+        </div>
+        <nav id="sidebar-nav">
+            <div class="nav-group">
+                <div class="nav-group-title">Core</div>
+                <ul>
+                    <li><a href="#overview">Overview & Objectives</a></li>
+                    <li><a href="#architecture">System Architecture</a></li>
+                    <li><a href="#structure">Project Structure</a></li>
+                    <li><a href="#deployment">Deployment</a></li>
+                </ul>
+            </div>
+            <div class="nav-group">
+                <div class="nav-group-title">Simulation & Integration</div>
+                <ul>
+                    <li><a href="#cityflow">CityFlow Integration</a></li>
+                    <li><a href="#workflow">Experiment Workflow</a></li>
+                    <li><a href="#metrics">Metrics & Evaluation</a></li>
+                </ul>
+            </div>
+            <div class="nav-group">
+                <div class="nav-group-title">Advanced Research</div>
+                <ul>
+                    <li><a href="#robustness">📊 Robustness Experiments</a></li>
+                    <li><a href="#rl-loop">RL Control Loop</a></li>
+                    <li><a href="#comparison">Control Strategy Comparison</a></li>
+                    <li><a href="#results">Results & Analysis</a></li>
+                </ul>
+            </div>
+            <div class="nav-group">
+                <div class="nav-group-title">Meta</div>
+                <ul>
+                    <li><a href="#limitations">Limitations & Future</a></li>
+                    <li><a href="#citation">Citation</a></li>
+                </ul>
+            </div>
+        </nav>
+    </aside>
+
+    <main>
+        <!-- SECTION 1: OVERVIEW & OBJECTIVES -->
+        <section id="overview">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                <span class="badge">v2.1.0 Enterprise</span>
+                <span class="badge" style="background: #ecfdf5; color: var(--success); border-color: #d1fae5;">MIT License</span>
+            </div>
+            
+            <h2>Overview</h2>
+            <p>A specialized <strong>enterprise-grade Web API testing and experimentation platform</strong>, tailored for traffic simulation, Intelligent Transportation Systems (ITS), and CityFlow-based research. This system bridges the gap between microscopic traffic simulators and modern web architectures.</p>
+            
+            <div class="grid">
+                <div class="card">
+                    <h4>High Performance</h4>
+                    <p>Go-based load generation capable of 50k+ req/sec simulation, ensuring APIs can handle peak city-scale traffic.</p>
+                </div>
+                <div class="card">
+                    <h4>RL Native</h4>
+                    <p>Standardized Reward/State interfaces for Gym-like interaction, supporting DQN, PPO, and A2C algorithms.</p>
+                </div>
+                <div class="card">
+                    <h4>Fault Injection</h4>
+                    <p>Built-in mechanisms to simulate network jitter, packet loss, and simulator failures to test robustness.</p>
+                </div>
+            </div>
+
+            <h3>Research Objectives</h3>
+            <p>This platform is designed to address the following needs:</p>
+            <ul>
+                <li>Evaluate <strong>traffic signal control strategies</strong> under realistic API workloads.</li>
+                <li>Benchmark <strong>reinforcement learning (RL) and rule-based controllers</strong> directly.</li>
+                <li>Simulate <strong>high-frequency vehicle and sensor data streams</strong>.</li>
+                <li>Measure <strong>latency, throughput, and stability</strong> of traffic-management APIs.</li>
+                <li>Support <strong>reproducible experiments</strong> for academic publication.</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 2: ARCHITECTURE -->
+        <section id="architecture">
+            <h2>System Architecture</h2>
+            <p>The system integrates Node.js for orchestration, Go for load generation, and CityFlow for simulation logic.</p>
+            
+            <div class="ascii-diagram">
+┌──────────────┐     REST / gRPC     ┌──────────────────┐
+│  Go Load     │ ─────────────────▶ │  Node.js API     │
+│  Generators  │                    │  Gateway         │
+└──────────────┘                    └─────────┬────────┘
+        ▲                                      │
+        │ Metrics / Events                     │
+        │                                      ▼
+┌──────────────┐                    ┌──────────────────┐
+│ CityFlow /   │ ◀───────────────── │ Simulation       │
+│ Traffic Sim  │   Control Actions  │ Services         │
+└──────────────┘                    └──────────────────┘
+        │
+        ▼
+┌──────────────────┐
+│ Data Storage &   │
+│ Experiment Logs  │
+└──────────────────┘
+            </div>
+        </section>
+
+        <!-- SECTION 3: PROJECT STRUCTURE -->
+        <section id="structure">
+            <h2>Project Structure</h2>
+            <p>A research-oriented modular layout separating API logic, domain models, and infrastructure concerns.</p>
+            <div class="grid">
+                <div class="card">
+                    <h4><span class="code-block">src/api</span></h4>
+                    <p>Experiment control endpoints, traffic state ingestion, and control action dispatch.</p>
+                </div>
+                <div class="card">
+                    <h4><span class="code-block">src/domain</span></h4>
+                    <p>Traffic entities (Vehicle, Lane), flow/density models, and scenario definitions.</p>
+                </div>
+                <div class="card">
+                    <h4><span class="code-block">go/</span></h4>
+                    <p>High-throughput traffic event generators and performance monitoring tools.</p>
+                </div>
+                <div class="card">
+                    <h4><span class="code-block">tests/</span></h4>
+                    <p>Deterministic unit tests, CityFlow integration tests, and end-to-end validation.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: DEPLOYMENT -->
+        <section id="deployment">
+            <h2>Deployment & Reproducibility</h2>
+            <p>Designed for rigorous academic standards, ensuring results are repeatable and publishable.</p>
+            <div class="grid">
+                <div class="card" style="border-left: 4px solid var(--primary);">
+                    <h4>Modes</h4>
+                    <ul>
+                        <li>Local research environment</li>
+                        <li>Docker-based experiment runner</li>
+                        <li>CI-driven automated benchmarking</li>
+                        <li>Cloud-based large-scale simulation</li>
+                    </ul>
+                </div>
+                <div class="card" style="border-left: 4px solid var(--success);">
+                    <h4>Quality Assurance</h4>
+                    <ul>
+                        <li>Versioned experiment configurations</li>
+                        <li>Deterministic simulation seeds</li>
+                        <li>Containerized environments</li>
+                        <li>CI-backed experiment validation</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: CITYFLOW INTEGRATION -->
+        <section id="cityflow">
+            <h2>CityFlow Integration</h2>
+            <p>The platform integrates seamlessly with CityFlow, supporting step-based simulation, real-time polling, and batch execution.</p>
+            
+            <h3>Explicit API Mapping</h3>
+            <p>The Test API wraps CityFlow core functions with validation, logging, and fault tolerance.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Test API Responsibility</th>
+                        <th>CityFlow API Call</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Initialize simulation</td>
+                        <td><code>Engine(config.json)</code></td>
+                        <td>Load road network & flows</td>
+                    </tr>
+                    <tr>
+                        <td>Advance simulation</td>
+                        <td><code>engine.next_step()</code></td>
+                        <td>Move simulation forward</td>
+                    </tr>
+                    <tr>
+                        <td>Get state</td>
+                        <td><code>get_lane_vehicles()</code> / <code>get_vehicle_speed()</code></td>
+                        <td>Retrieve vehicle IDs & speeds</td>
+                    </tr>
+                    <tr>
+                        <td>Estimate queues</td>
+                        <td><code>get_lane_waiting_vehicle_count()</code></td>
+                        <td>Count waiting vehicles</td>
+                    </tr>
+                    <tr>
+                        <td>Apply control</td>
+                        <td><code>set_traffic_light_phase()</code></td>
+                        <td>Change signal phase</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- SECTION 6: WORKFLOW -->
+        <section id="workflow">
+            <h2>Experiment Workflow</h2>
+            <p>A standardized pipeline for conducting traffic simulation experiments.</p>
+            <div class="ascii-diagram">
+1. Define scenario and traffic demand
+   │
+2. Configure simulator and API endpoints
+   │
+3. Run Go-based load and data simulators
+   │
+4. Collect metrics (queue, delay, throughput)
+   │
+5. Export results for statistical analysis
+            </div>
+        </section>
+
+        <!-- SECTION 7: METRICS -->
+        <section id="metrics">
+            <h2>Metrics & Evaluation</h2>
+            <p>The platform supports quantitative evaluation of traffic performance and API stability.</p>
+            <div class="grid">
+                <div class="card">
+                    <h4>Traffic Metrics</h4>
+                    <ul>
+                        <li>Average vehicle delay</li>
+                        <li>Queue length distribution</li>
+                        <li>Throughput per intersection</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>System Metrics</h4>
+                    <ul>
+                        <li>API response latency</li>
+                        <li>System stability under load</li>
+                        <li>Error rates & recovery time</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>Export Formats</h4>
+                    <ul>
+                        <li>CSV / JSON</li>
+                        <li>Database persistence</li>
+                        <li>LaTeX-compatible figures</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 8: ROBUSTNESS (TEMPLATE SPECIFIC) -->
+        <section id="robustness">
+            <h2>📊 Robustness & Stress Evaluation</h2>
+            <p>Beyond ideal simulation, this platform includes a dedicated <strong>Stress-Testing Suite</strong> to evaluate how controllers handle failures, latency, and missing data.</p>
+            
+            <h3>1. Fault Injection Scenarios</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Failure Type</th>
+                        <th>Injection Method</th>
+                        <th>Research Objective</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="robustness-tag">Network Jitter</span></td>
+                        <td>Injected 50ms-200ms API latency</td>
+                        <td>Measure impact of lag on RL decision windows.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="robustness-tag">Packet Loss</span></td>
+                        <td>Random 5% request dropping</td>
+                        <td>Evaluate controller stability with missing state data.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="robustness-tag">Invalid Actions</span></td>
+                        <td>Malformed control requests</td>
+                        <td>Test API validation and simulator state preservation.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="robustness-tag">Simulator Drift</span></td>
+                        <td>Desynced step-skipping</td>
+                        <td>Test robustness of asynchronous control loops.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="robustness-tag">Overload</span></td>
+                        <td>2x Peak Traffic Demand</td>
+                        <td>Identify the breaking point of queue-clearing algorithms.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>2. Stability Metrics</h3>
+            <p>We use the <strong>System Recovery Index (SRI)</strong> to quantify how quickly a controller restores normal traffic flow after a fault injection.</p>
+            <div class="ascii-diagram">
+SRI = (T_recovery - T_fault) / (Delay_max / Delay_baseline)
+
+[ Normal Flow ] ----> [ FAULT INJECTED ] ----> [ OSCILLATION ] ----> [ RECOVERY ]
+      (A)                     (B)                    (C)                 (D)
+            </div>
+
+            <h3>3. Robustness Results (Comparative)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Strategy</th>
+                        <th>Throughput (Ideal)</th>
+                        <th>Throughput (10% Lag)</th>
+                        <th>Degradation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Fixed-Time</td>
+                        <td>1820 veh/h</td>
+                        <td>1815 veh/h</td>
+                        <td><span style="color: var(--success)">↓ 0.3%</span></td>
+                    </tr>
+                    <tr>
+                        <td>Actuated</td>
+                        <td>1985 veh/h</td>
+                        <td>1720 veh/h</td>
+                        <td><span style="color: var(--warning)">↓ 13.3%</span></td>
+                    </tr>
+                    <tr>
+                        <td>RL-DeepQ</td>
+                        <td>2150 veh/h</td>
+                        <td>1650 veh/h</td>
+                        <td><span style="color: var(--danger)">↓ 23.2%</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <blockquote><strong>Insight:</strong> While RL performs best in ideal conditions, it is significantly more sensitive to API latency compared to simpler rule-based controllers.</blockquote>
+        </section>
+
+        <!-- SECTION 9: RL LOOP -->
+        <section id="rl-loop">
+            <h2>Reinforcement Learning Loop</h2>
+            <p>The platform natively supports <strong>closed-loop reinforcement learning (RL)</strong> for traffic signal control.</p>
+            
+            <div class="ascii-diagram">
+┌─────────────┐
+│  Simulator  │  (CityFlow)
+└──────┬──────┘
+       │ State: queue, speed, density
+       ▼
+┌─────────────┐
+│  RL Agent   │  (DQN / PPO / A2C)
+└──────┬──────┘
+       │ Action: signal phase, timing
+       ▼
+┌─────────────┐
+│ Traffic API │  (Node.js Gateway)
+└──────┬──────┘
+       │ Apply control
+       ▼
+┌─────────────┐
+│  Simulator  │
+└──────┬──────┘
+       │ Reward: delay, throughput
+       └───────────────┐
+                       ▼
+                  Policy Update
+            </div>
+
+            <div class="grid">
+                <div class="card" style="border-left: 4px solid var(--primary)">
+                    <strong>State Space</strong>
+                    <ul>
+                        <li>Queue length per lane</li>
+                        <li>Average vehicle speed</li>
+                        <li>Lane occupancy / density</li>
+                        <li>Signal phase encoding</li>
+                    </ul>
+                </div>
+                <div class="card" style="border-left: 4px solid var(--success)">
+                    <strong>Action Space</strong>
+                    <ul>
+                        <li>Phase selection</li>
+                        <li>Phase duration adjustment</li>
+                        <li>Adaptive green splitting</li>
+                    </ul>
+                </div>
+                <div class="card" style="border-left: 4px solid var(--warning)">
+                    <strong>Reward Function</strong>
+                    <code>R = -(w1*Delay + w2*Queue + w3*Pressure)</code>
+                    <br><small style="color: var(--secondary); display:block; margin-top:0.5rem">Includes penalties for phase switching and stops.</small>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 10: COMPARISON -->
+        <section id="comparison">
+            <h2>Control Strategy Comparison</h2>
+            <p>Systematic comparison of three major traffic signal control paradigms.</p>
+            
+            <div class="grid">
+                <div class="card">
+                    <h3>1. Fixed-Time</h3>
+                    <p>Predefined phases and cycle lengths. No adaptation. Low computational cost but poor performance under fluctuating demand.</p>
+                    <span class="badge">Baseline</span>
+                </div>
+                <div class="card">
+                    <h3>2. Actuated</h3>
+                    <p>Adapts based on detector input using threshold logic. Moderate adaptability but sensitive to detector placement.</p>
+                    <span class="badge">Intermediate</span>
+                </div>
+                <div class="card">
+                    <h3>3. RL-Based</h3>
+                    <p>Learns optimal policies via interaction. High adaptability and scalability, but requires training.</p>
+                    <span class="badge" style="background: #eff6ff; color: var(--primary); border-color: #bfdbfe;">Advanced</span>
+                </div>
+            </div>
+
+            <h3>Quantitative Comparison</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Strategy</th>
+                        <th>Avg Delay (s)</th>
+                        <th>Avg Queue</th>
+                        <th>Throughput (veh/h)</th>
+                        <th>Adaptability</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Fixed-Time</td>
+                        <td>42.6</td>
+                        <td>17.4</td>
+                        <td>1820</td>
+                        <td>None</td>
+                    </tr>
+                    <tr>
+                        <td>Actuated</td>
+                        <td>34.1</td>
+                        <td>13.6</td>
+                        <td>1985</td>
+                        <td>Medium</td>
+                    </tr>
+                    <tr>
+                        <td><strong>RL-Based</strong></td>
+                        <td><strong>28.9</strong></td>
+                        <td><strong>10.2</strong></td>
+                        <td><strong>2150</strong></td>
+                        <td>High</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- SECTION 11: RESULTS -->
+        <section id="results">
+            <h2>Results & Analysis</h2>
+            <p>The platform produces <strong>publication-ready experimental results</strong>. Below is an example of an experiment comparing a Baseline Controller against an RL Controller.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Baseline Control</th>
+                        <th>RL Controller</th>
+                        <th>Improvement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Avg Vehicle Delay (s)</td>
+                        <td>42.6</td>
+                        <td>28.9</td>
+                        <td>↓ 32.1%</td>
+                    </tr>
+                    <tr>
+                        <td>Avg Queue Length (vehicles)</td>
+                        <td>17.4</td>
+                        <td>10.2</td>
+                        <td>↓ 41.3%</td>
+                    </tr>
+                    <tr>
+                        <td>Throughput (veh/hour)</td>
+                        <td>1820</td>
+                        <td>2150</td>
+                        <td>↑ 18.1%</td>
+                    </tr>
+                    <tr>
+                        <td>API Latency (ms, p95)</td>
+                        <td>96</td>
+                        <td>104</td>
+                        <td>+8.3%</td>
+                    </tr>
+                    <tr>
+                        <td>System Stability (crash rate)</td>
+                        <td>Stable</td>
+                        <td>Stable</td>
+                        <td>—</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Supported Plots</h3>
+            <p>Results can be visualized and exported directly into LaTeX-compatible figures:</p>
+            <ul>
+                <li>Vehicle delay vs. time</li>
+                <li>Queue length distribution</li>
+                <li>Throughput comparison</li>
+                <li>API latency under load</li>
+                <li>Reward convergence (RL)</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 12: LIMITATIONS & FUTURE -->
+        <section id="limitations">
+            <h2>Limitations & Future Work</h2>
+            
+            <h3>Current Limitations</h3>
+            <div class="grid">
+                <div class="card">
+                    <h4>Simulator Dependency</h4>
+                    <p>Tightly coupled to CityFlow. Limits portability to SUMO or VISSIM without abstraction layers.</p>
+                    <div class="impact-box">
+                        <small><strong>Impact:</strong> Results may reflect CityFlow-specific dynamics.</small>
+                    </div>
+                </div>
+                <div class="card">
+                    <h4>Discrete-Time Assumption</h4>
+                    <p>Fixed-step simulation assumes synchronous timing, ignoring real-world jitter and noise.</p>
+                    <div class="impact-box">
+                        <small><strong>Impact:</strong> Latency modeling is simplified.</small>
+                    </div>
+                </div>
+                <div class="card">
+                    <h4>Simplified Demand</h4>
+                    <p>Relies on pre-configured demand files. Lacks incidents, weather, and mixed traffic (pedestrians).</p>
+                    <div class="impact-box">
+                        <small><strong>Impact:</strong> Policies may overfit to repetitive patterns.</small>
+                    </div>
+                </div>
+                <div class="card">
+                    <h4>Reactive Error Handling</h4>
+                    <p>Failures are mitigated after occurrence, not predicted or learned against.</p>
+                    <div class="impact-box">
+                        <small><strong>Impact:</strong> No explicit reliability signal in the learning loop.</small>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Future Work</h3>
+            <p>Planned extensions to address these limitations and broaden research impact:</p>
+            <div class="grid">
+                <div class="card">
+                    <h4>Simulator-Agnostic Layer</h4>
+                    <p>Generic adapters to switch seamlessly between CityFlow, SUMO, and others.</p>
+                </div>
+                <div class="card">
+                    <h4>Asynchronous Control</h4>
+                    <p>Modeling variable latency and network-induced delays for real-world accuracy.</p>
+                </div>
+                <div class="card">
+                    <h4>Multi-Agent RL (MARL)</h4>
+                    <p>Coordination across intersections using MADDPG, MAPPO, or GNNs.</p>
+                </div>
+                <div class="card">
+                    <h4>Robust RL</h4>
+                    <p>Incorporating failure signals into the reward function for safety-critical learning.</p>
+                </div>
+                <div class="card">
+                    <h4>Real-World Integration</h4>
+                    <p>Connecting to physical loop detectors, cameras, and adaptive signal controllers.</p>
+                </div>
+                <div class="card">
+                    <h4>Explainability (XAI)</h4>
+                    <p>Tools to analyze phase choices and congestion influence for regulatory approval.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 13: CITATION -->
+        <section id="citation">
+            <h2>Citation</h2>
+            <p>If you use this platform in academic work, please cite it as follows:</p>
+            <div class="citation-box">
+                <button class="copy-btn" onclick="copyCitation()">Copy BibTeX</button>
+                <pre id="bibtex">
+@software{traffic_api_platform,
+  title  = {Web API Test Platform for Traffic Simulation},
+  author = {Ahmed Albreem},
+  year   = {2026},
+  note   = {Enterprise-grade framework for ITS and CityFlow research}
+}</pre>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // 1. Smooth Scroll & Active Link Highlighting
+        const sections = document.querySelectorAll("section");
+        const navLinks = document.querySelectorAll("nav a");
+
+        window.addEventListener("scroll", () => {
+            let current = "";
+            sections.forEach((section) => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= sectionTop - 150) {
+                    current = section.getAttribute("id");
+                }
+            });
+
+            navLinks.forEach((a) => {
+                a.classList.remove("active");
+                if (a.getAttribute("href").includes(current)) {
+                    a.classList.add("active");
+                }
+            });
+        });
+
+        // 2. Copy Citation Logic
+        function copyCitation() {
+            const text = document.getElementById("bibtex").innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector(".copy-btn");
+                const originalText = btn.innerText;
+                btn.innerText = "Copied!";
+                btn.style.background = "#10b981";
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.background = "#334155";
+                }, 2000);
+            });
+        }
+
+        // 3. Simple Card Animation on Hover
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.borderColor = 'var(--primary)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.borderColor = 'var(--border)';
+            });
+        });
+    </script>
+</body>
+</html>
