@@ -1,1 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web API Test Project v1.0 | Enterprise Documentation</title>
+    <!-- Inter Font for modern research look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Color Palette */
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --primary-light: #eff6ff;
+            --secondary: #475569;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+            
+            /* Status Colors */
+            --success: #10b981;
+            --success-bg: #ecfdf5;
+            --warning: #f59e0b;
+            --warning-bg: #fffbeb;
+            --danger: #ef4444;
+            --danger-bg: #fef2f2;
 
+            /* Layout */
+            --sidebar-width: 300px;
+            --header-height: 60px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #334155;
+            background-color: #f1f5f9;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* --- Custom Scrollbar --- */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* --- Reading Progress Bar --- */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: transparent;
+            z-index: 1000;
+        }
+        .progress-bar {
+            height: 4px;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.1s;
+        }
+
+        /* --- Sidebar Navigation --- */
+        aside {
+            width: var(--sidebar-width);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border);
+            padding: 2rem 1.5rem;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+            transform: translateX(0);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-area {
+            padding: 0 0 2rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .logo-area h1 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1.3;
+        }
+        
+        .logo-area span { color: var(--primary); }
+        .version-badge {
+            display: inline-block;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            background: var(--dark);
+            color: white;
+            border-radius: 4px;
+        }
+
+        .nav-group { margin-bottom: 1.5rem; }
+        
+        .nav-group-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            padding-left: 0.75rem;
+        }
+
+        nav ul { list-style: none; }
+        nav li { margin-bottom: 0.1rem; }
+
+        nav a {
+            text-decoration: none;
+            color: var(--secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            transition: var(--transition);
+            border-left: 3px solid transparent;
+        }
+
+        nav a:hover {
+            background: var(--light);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        nav a.active {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+            border-left-color: var(--primary);
+        }
+
+        /* --- Main Content --- */
+        main {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 4rem 4rem;
+            max-width: 1200px; /* Constrain width for readability */
+            width: 100%;
+        }
+
+        section {
+            background: white;
+            padding: 3rem;
+            border-radius: 12px;
+            margin-bottom: 3rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+            scroll-margin-top: 2rem;
+        }
+
+        /* --- Typography --- */
+        h2 {
+            font-size: 1.75rem;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            color: var(--dark);
+            margin: 2rem 0 1rem;
+            font-weight: 600;
+        }
+
+        h4 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        p { margin-bottom: 1.25rem; font-size: 1.05rem; color: #334155; }
+        
+        /* --- Components --- */
+        .badge {
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .badge-blue { background: var(--primary-light); color: var(--primary); }
+        .badge-green { background: var(--success-bg); color: var(--success); }
+        .badge-red { background: var(--danger-bg); color: var(--danger); }
+        .badge-gray { background: #f1f5f9; color: #64748b; border: 1px solid var(--border); }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .card {
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: var(--transition);
+            background: white;
+            height: 100%;
+        }
+
+        .card:hover { 
+            border-color: var(--primary-light); 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        /* --- Code Blocks --- */
+        .code-block {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            background: var(--dark);
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            position: relative;
+            margin: 1.5rem 0;
+        }
+        
+        .code-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- Directory Tree --- */
+        .file-tree {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            color: #475569;
+        }
+        .file-tree ul { list-style: none; padding-left: 1.5rem; margin: 0; }
+        .file-tree li { margin: 0.25rem 0; position: relative; }
+        .file-tree li::before {
+            content: '├';
+            position: absolute;
+            left: -1rem;
+            color: #cbd5e1;
+        }
+        .file-tree li:last-child::before { content: '└'; }
+        .folder { font-weight: 700; color: var(--dark); margin-top: 0.5rem; }
+        .folder::before { content: ''; display: none; }
+        .file { color: #64748b; }
+        .comment { color: #94a3b8; font-style: italic; margin-left: 1rem; }
+
+        /* --- Tables --- */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 0.9rem;
+            border: 1px solid var(--border);
+        }
+        .data-table th { 
+            background: #f8fafc; 
+            font-weight: 600; 
+            text-align: left; 
+            color: var(--secondary); 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em;
+            padding: 1rem; 
+            border-bottom: 1px solid var(--border); 
+        }
+        .data-table td { padding: 1rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tr:hover { background: #f8fafc; }
+
+        /* --- Interactive Tool: Port Checker --- */
+        .tool-panel {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .tool-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .input-group { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; min-width: 200px; }
+        .input-group label { font-size: 0.8rem; font-weight: 600; color: var(--secondary); text-transform: uppercase; }
+        .input-group input {
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: inherit;
+        }
+        .action-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .action-btn:hover { background: var(--primary-dark); }
+        .action-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+        
+        .results-area {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            min-height: 100px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .log-entry { margin-bottom: 0.25rem; border-bottom: 1px solid #334155; padding-bottom: 0.25rem; }
+        .log-success { color: #4ade80; }
+        .log-error { color: #f87171; }
+        .log-info { color: #60a5fa; }
+
+        /* --- Integration Test Styling --- */
+        .test-category {
+            background: #f8fafc;
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 0 8px 8px 0;
+        }
+        .test-category h4 { margin-bottom: 0.5rem; font-size: 1rem; color: var(--dark); text-transform: none; }
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        .checklist-item::before {
+            content: '✓';
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        /* --- Mobile Responsive --- */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 101;
+            background: white;
+            border: 1px solid var(--border);
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+
+        @media (max-width: 1024px) {
+            .mobile-menu-btn { display: block; }
+            aside { transform: translateX(-100%); width: 280px; box-shadow: 10px 0 20px rgba(0,0,0,0.1); }
+            aside.mobile-open { transform: translateX(0); }
+            main { margin-left: 0; padding: 2rem 1.5rem; padding-top: 5rem; }
+            .grid { grid-template-columns: 1fr; }
+            .tool-controls { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Reading Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+
+    <aside id="sidebar">
+        <div class="logo-area">
+            <h1>Web API Test <span>Project</span></h1>
+            <div class="version-badge">v1.0.0 Production Ready</div>
+            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem;">Enterprise-Grade Framework</div>
+        </div>
+        <nav id="sidebar-nav">
+            <div class="nav-group">
+                <div class="nav-group-title">Documentation</div>
+                <ul>
+                    <li><a href="#summary">Executive Summary</a></li>
+                    <li><a href="#architecture">System Architecture</a></li>
+                    <li><a href="#structure">Project Structure</a></li>
+                    <li><a href="#api">API Specification</a></li>
+                    <li><a href="#database">Database Layer</a></li>
+                </ul>
+            </div>
+            <div class="nav-group">
+                <div class="nav-group-title">Testing Framework</div>
+                <ul>
+                    <li><a href="#integration-testing">Integration Tests (Go)</a></li>
+                </ul>
+            </div>
+            <div class="nav-group">
+                <div class="nav-group-title">Deployment</div>
+                <ul>
+                    <li><a href="#docker">Docker & Containerization</a></li>
+                    <li><a href="#utilities">Go Utilities</a></li>
+                    <li><a href="#troubleshoot">Troubleshooting</a></li>
+                </ul>
+            </div>
+            <div class="nav-group">
+                <div class="nav-group-title">Interactive Tools</div>
+                <ul>
+                    <li><a href="#port-checker">🌐 Port Checker</a></li>
+                </ul>
+            </div>
+            <div class="nav-group">
+                <div class="nav-group-title">Reference</div>
+                <ul>
+                    <li><a href="#env-vars">Environment Variables</a></li>
+                    <li><a href="#error-codes">Error Codes</a></li>
+                </ul>
+            </div>
+        </nav>
+    </aside>
+
+    <main>
+        <!-- SECTION 1: SUMMARY -->
+        <section id="summary">
+            <h2>Executive Summary</h2>
+            <p>A comprehensive, production-ready API framework designed for rapid development, testing, and deployment of scalable web services. This project serves as a reference architecture for building high-concurrency APIs.</p>
+            
+            <div class="grid">
+                <div class="card">
+                    <h4>Multi-Database Support</h4>
+                    <p>Seamless switching between MongoDB, MySQL, and PostgreSQL via a unified abstraction layer.</p>
+                </div>
+                <div class="card">
+                    <h4>Security First</h4>
+                    <p>JWT-based authentication with role-based access control (RBAC) and OWASP Top 10 protection.</p>
+                </div>
+                <div class="card">
+                    <h4>Performance Ready</h4>
+                    <p>Containerized deployment with Go utilities for load testing and network validation.</p>
+                </div>
+                <div class="card">
+                    <h4>Enterprise Monitoring</h4>
+                    <p>Built-in health checks, Prometheus metrics collection, and structured logging.</p>
+                </div>
+            </div>
+
+            <h3>Quick Start Timeline</h3>
+            <div style="background: #f8fafc; padding: 1rem; border-left: 4px solid var(--primary); border-radius: 4px;">
+                <ul style="margin:0; padding-left: 1.5rem;">
+                    <li style="margin-bottom: 0.5rem"><strong>5 min:</strong> Clone repository and install dependencies</li>
+                    <li style="margin-bottom: 0.5rem"><strong>10 min:</strong> Configure environment and database connections</li>
+                    <li style="margin-bottom: 0.5rem"><strong>2 min:</strong> Start services with Docker Compose</li>
+                    <li><strong>1 min:</strong> Verify deployment with health check endpoints</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SECTION 2: ARCHITECTURE -->
+        <section id="architecture">
+            <h2>System Architecture</h2>
+            <p>The system utilizes a layered architecture pattern to ensure separation of concerns, scalability, and maintainability.</p>
+            
+            <div class="code-block">
+                <div class="code-block-header">High-Level Architecture View</div>
+┌──────────────────────────────────────────────────────────────────────┐
+│                         Client Layer                                  │
+│       Web Apps | Mobile Apps | Third-Party Services                   │
+└────────────────────────────┬─────────────────────────────────────────┘
+                             │ HTTPS/REST
+                             ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│                    API Gateway & Core Services                       │
+│  Rate Limiting | Load Balancing | Request Routing | Caching (Redis)   │
+└────────────────────────────┬─────────────────────────────────────────┘
+                             │ Auth (JWT)
+                             ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│                      Business Logic Layer                             │
+│  Auth Service | User Management | File Processing | Audit Logging     │
+└────────────────────────────┬─────────────────────────────────────────┘
+                             │
+                             ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│                       Data Access Layer                              │
+│            Database Abstraction | Connection Pooling                  │
+└────────────────────────────┬─────────────────────────────────────────┘
+                             │
+        ┌────────────────────┼────────────────────┐
+        ▼                    ▼                    ▼
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│   MongoDB    │    │  PostgreSQL  │    │     Redis    │
+└──────────────┘    └──────────────┘    └──────────────┘
+            </div>
+        </section>
+
+        <!-- SECTION 3: PROJECT STRUCTURE -->
+        <section id="structure">
+            <h2>Project Structure</h2>
+            <p>A modular directory organization separating concerns into distinct layers (Application, Domain, Infrastructure).</p>
+            
+            <div class="file-tree">
+                <div class="folder">web_api_test/</div>
+                <ul>
+                    <li><div class="folder">config/</div> Configuration files & Environments</li>
+                    <li><div class="folder">src/</div>
+                        <ul>
+                            <li><div class="folder">application/</div> Use-cases & DTOs</li>
+                            <li><div class="folder">domain/</div> Entities, Repositories, Services</li>
+                            <li><div class="folder">infrastructure/</div>
+                                <ul>
+                                    <li><div class="folder">database/</div> Strategies for Mongo/MySQL/Postgres</li>
+                                    <li><div class="folder">http/</div> Controllers, Middleware, Routes</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><div class="folder">go/</div>
+                        <ul>
+                            <li><div class="folder">cmd/</div> Command-line tools</li>
+                            <li><div class="folder">pkg/</div> Libraries & Utilities</li>
+                        </ul>
+                    </li>
+                    <li><div class="folder">tests/</div> Unit, Integration, E2E, Load</li>
+                    <li class="file">Dockerfile <span class="comment"># Multi-stage build</span></li>
+                    <li class="file">docker-compose.yml</li>
+                    <li class="file">package.json</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SECTION 4: API SPECIFICATION -->
+        <section id="api">
+            <h2>API Specification</h2>
+            <p>Comprehensive REST API supporting JSON requests/responses with standardized error handling and status codes.</p>
+
+            <h3>Authentication Endpoints</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">Method</th>
+                        <th>Endpoint</th>
+                        <th>Auth</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge badge-green">POST</span></td>
+                        <td>/api/auth/register</td>
+                        <td>Public</td>
+                        <td>Register new user account</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-green">POST</span></td>
+                        <td>/api/auth/login</td>
+                        <td>Public</td>
+                        <td>Authenticate user credentials</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-blue">GET</span></td>
+                        <td>/api/auth/profile</td>
+                        <td>Required</td>
+                        <td>Get current user profile</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- SECTION 5: DATABASE -->
+        <section id="database">
+            <h2>Database Configuration</h2>
+            <p>The framework provides an abstraction layer (<code>DatabaseService</code>) to switch between engines using environment variables without changing application code.</p>
+
+            <div class="grid">
+                <div class="card" style="border-left: 4px solid var(--primary);">
+                    <h4>MongoDB</h4>
+                    <p>Default NoSQL option. High flexibility for document storage.</p>
+                    <span class="badge badge-gray">Default Port: 27017</span>
+                </div>
+                <div class="card" style="border-left: 4px solid #3b82f6;">
+                    <h4>PostgreSQL</h4>
+                    <p>Robust SQL option for complex relational data and transactions.</p>
+                    <span class="badge badge-gray">Default Port: 5432</span>
+                </div>
+                <div class="card" style="border-left: 4px solid #f97316;">
+                    <h4>MySQL</h4>
+                    <p>Standard SQL option for traditional web applications.</p>
+                    <span class="badge badge-gray">Default Port: 3306</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6: INTEGRATION TESTING (NEW SECTION) -->
+        <section id="integration-testing">
+            <h2>Integration Test Framework</h2>
+            <p>This project implements a fully automated, production-grade integration testing framework written in Go. It is designed to validate backend services in a realistic environment using Docker, HTTP APIs, and concurrent workloads.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">Test Configuration Structure (Go)</div>
+type TestConfig struct {
+    TestID           string        `json:"test_id"`           // Unique ID per run
+    DockerComposeCmd string        `json:"compose_cmd"`      // Path to docker-compose
+    ServerCmd        []string      `json:"server_cmd"`       // Command to start API
+    ServerURL        string        `json:"server_url"`       // Base URL for API
+    Retries          int           `json:"retries"`          // Max retry attempts
+    InitialDelay     time.Duration `json:"initial_delay"`    // Delay before checks
+    Concurrency      int           `json:"concurrency"`      // Number of workers for load test
+}
+            </div>
+
+            <h3>Core Capabilities</h3>
+            <div class="grid">
+                <div class="card">
+                    <h4>🔧 Configuration Management</h4>
+                    <p>Centralized <code>TestConfig</code> structure controlling Docker, Server, HTTP client, Retry, and Concurrency behavior. Supports environment variable overrides for flexible CI/CD execution.</p>
+                </div>
+                <div class="card">
+                    <h4>🐳 Docker Environment</h4>
+                    <p>Automatically starts and stops required services using Docker Compose. Verifies service readiness via TCP port checks. Supports rebuilds, orphan cleanup, volume removal, and network isolation.</p>
+                </div>
+                <div class="card">
+                    <h4>🚀 Server Lifecycle</h4>
+                    <p>Launches the backend server as an external process. Waits for availability using a health endpoint and ensures graceful shutdown with timeout-based fallback termination.</p>
+                </div>
+                <div class="card">
+                    <h4>🌐 HTTP Client Infrastructure</h4>
+                    <p>Optimized HTTP client with connection pooling and timeout tuning. Supports high-concurrency testing with controlled resource usage.</p>
+                </div>
+                <div class="card">
+                    <h4>🔁 Retry & Fault Tolerance</h4>
+                    <p>Implements exponential backoff with jitter for unstable operations. Retries environment setup and transient failures automatically.</p>
+                </div>
+            </div>
+
+            <h3>Test Coverage</h3>
+            <div class="test-category">
+                <h4>Health & Readiness</h4>
+                <div class="checklist-item">Validates /health endpoint structure and status.</div>
+                <div class="checklist-item">Ensures service is operational before executing other tests.</div>
+            </div>
+
+            <div class="test-category">
+                <h4>User API Validation</h4>
+                <div class="checklist-item">Retrieves user lists.</div>
+                <div class="checklist-item">Creates users with valid and invalid payloads.</div>
+                <div class="checklist-item">Handles non-existent resource requests gracefully.</div>
+            </div>
+
+            <div class="test-category">
+                <h4>File Upload Testing</h4>
+                <div class="checklist-item">Validates multipart file uploads.</div>
+                <div class="checklist-item">Covers edge cases: Missing files, Empty uploads, Unsupported file types.</div>
+            </div>
+
+            <div class="test-category">
+                <h4>Concurrent Load Testing</h4>
+                <div class="checklist-item">Executes multiple simultaneous requests.</div>
+                <div class="checklist-item">Detects race conditions, instability, or performance degradation.</div>
+                <div class="checklist-item">Uses configurable worker pools for controlled stress testing.</div>
+            </div>
+
+            <h3>Utilities & Cleanup</h3>
+            <ul style="list-style: none; padding: 0;">
+                <li style="margin-bottom: 1rem; padding: 1rem; background: #f8fafc; border-radius: 6px;">
+                    <strong>Assertion & Validation:</strong> Custom assertion helpers for HTTP status codes, Content-Type validation, JSON field existence, and lightweight email format validation.
+                </li>
+                <li style="margin-bottom: 1rem; padding: 1rem; background: #f8fafc; border-radius: 6px;">
+                    <strong>Structured Logging:</strong> Thread-safe structured logger with timestamped output. Supports INFO, DEBUG, WARN, and ERROR levels.
+                </li>
+                <li style="margin-bottom: 1rem; padding: 1rem; background: #f8fafc; border-radius: 6px;">
+                    <strong>Automated Cleanup:</strong> Removes temporary files and directories after test execution. Stops all Docker services and server processes to prevent resource leaks.
+                </li>
+            </ul>
+
+            <h3>Purpose & Use Cases</h3>
+            <div class="grid" style="margin-top: 1rem;">
+                <div class="card" style="text-align: center;">
+                    <span style="font-size: 1.5rem;">🔚</span>
+                    <h4 style="margin-top: 0.5rem;">End-to-end API testing</h4>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <span style="font-size: 1.5rem;">🔄</span>
+                    <h4 style="margin-top: 0.5rem;">CI/CD pipelines</h4>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <span style="font-size: 1.5rem;">🔗</span>
+                    <h4 style="margin-top: 0.5rem;">Microservice validation</h4>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <span style="font-size: 1.5rem;">🛡️</span>
+                    <h4 style="margin-top: 0.5rem;">Backend reliability verification</h4>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7: DOCKER -->
+        <section id="docker">
+            <h2>Deployment & Containerization</h2>
+            <p>The project uses a multi-stage Docker build process to create a lightweight, production-ready image.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">Multi-Stage Dockerfile</div>
+# Stage 1: Builder
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Stage 2: Go Utils
+FROM golang:1.21-alpine AS go-builder
+WORKDIR /go/src/app
+COPY go/ ./
+RUN CGO_ENABLED=0 go build -o /go/bin/testutils ./cmd/testutils
+
+# Stage 3: Final Production Image
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=go-builder /go/bin/testutils ./go/bin/
+COPY . .
+
+# Non-root user setup
+RUN addgroup -S nodejs && adduser -S nodejs -u 1001
+USER nodejs
+CMD ["node", "index.js"]
+            </div>
+        </section>
+
+        <!-- SECTION 8: UTILITIES & INTERACTIVE PORT CHECKER -->
+        <section id="utilities">
+            <h2>Go Utilities</h2>
+            <p>Includes performance testing, network validation, and system monitoring tools written in Go for high throughput.</p>
+            
+            <h3>Port Checker Utility</h3>
+            <p>An interactive simulation of the Go-based port checker utility found in <code>go/pkg/utils/portchecker.go</code>. This tool verifies connectivity to services with retry logic and latency measurement.</p>
+
+            <div class="tool-panel">
+                <div class="tool-controls">
+                    <div class="input-group">
+                        <label>Target Host</label>
+                        <input type="text" id="hostInput" value="localhost" placeholder="e.g. localhost">
+                    </div>
+                    <div class="input-group">
+                        <label>Port</label>
+                        <input type="number" id="portInput" value="3000" placeholder="e.g. 3000">
+                    </div>
+                    <button class="action-btn" onclick="runPortCheck()">Check Connectivity</button>
+                </div>
+                
+                <div class="results-area" id="checkerLog">
+                    <div class="log-entry log-info">Ready to check port status...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 9: TROUBLESHOOTING -->
+        <section id="troubleshoot">
+            <h2>Troubleshooting & Diagnostics</h2>
+            <p>Common issues encountered during development and production deployment.</p>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 25%">Symptom</th>
+                        <th style="width: 25%">Possible Cause</th>
+                        <th>Solution</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>DB Connection Failures</strong></td>
+                        <td>Network issues, wrong credentials, DB down</td>
+                        <td>Verify <code>docker ps</code>, check <code>.env</code> connection strings, test firewall.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>High API Response Times</strong></td>
+                        <td>Unoptimized queries, no caching, insufficient resources</td>
+                        <td>Check slow query logs, enable Redis caching, monitor CPU/Memory.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Auth Errors</strong></td>
+                        <td>JWT config mismatch, token expiration</td>
+                        <td>Verify <code>JWT_SECRET</code>, check token expiration settings.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Container Crashes</strong></td>
+                        <td>Memory limits, unhandled exceptions</td>
+                        <td>Check <code>docker logs</code>, verify resource limits, review error handling.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- SECTION 10: ENV VARS -->
+        <section id="env-vars">
+            <h2>Environment Variables Reference</h2>
+            <div class="code-block">
+                <div class="code-block-header">Complete Configuration Variables</div>
+# Application
+NODE_ENV=production
+PORT=3000
+
+# Database
+DB_TYPE=mongo
+MONGO_URI=mongodb://localhost:27017/web_api
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# JWT Security
+JWT_SECRET=your-super-secret-jwt-key
+JWT_EXPIRES_IN=15m
+
+# File Upload
+UPLOAD_PATH=./uploads
+MAX_FILE_SIZE=10485760
+            </div>
+        </section>
+        
+        <!-- SECTION 11: ERROR CODES -->
+        <section id="error-codes">
+            <h2>API Error Codes Reference</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Error Code</th>
+                        <th>HTTP Status</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>VALIDATION_ERROR</td><td>400</td><td>Input validation failed</td></tr>
+                    <tr><td>AUTHENTICATION_FAILED</td><td>401</td><td>Invalid credentials or token</td></tr>
+                    <tr><td>TOKEN_EXPIRED</td><td>401</td><td>JWT token expired</td></tr>
+                    <tr><td>RESOURCE_NOT_FOUND</td><td>404</td><td>Requested resource missing</td></tr>
+                    <tr><td>RATE_LIMIT_EXCEEDED</td><td>429</td><td>Too many requests</td></tr>
+                    <tr><td>INTERNAL_SERVER_ERROR</td><td>500</td><td>Unexpected server error</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- SECTION 6: INTEGRATION TESTING (UPDATED) -->
+        <section id="integration-testing">
+            <h2>Integration Test Framework</h2>
+            <p>This project implements a fully automated, production-grade integration testing framework written in Go. It is designed to validate backend services in a realistic environment using Docker, HTTP APIs, and concurrent workloads.</p>
+
+            <div class="code-block">
+                <div class="code-block-header">Test Configuration Structure (Go)</div>
+type TestConfig struct {
+    TestID           string        `json:"test_id"`           // Unique ID per run
+    DockerComposeCmd string        `json:"compose_cmd"`      // Path to docker-compose
+    ServerCmd        []string      `json:"server_cmd"`       // Command to start API
+    ServerURL        string        `json:"server_url"`       // Base URL for API
+    Retries          int           `json:"retries"`          // Max retry attempts
+    InitialDelay     time.Duration `json:"initial_delay"`    // Delay before checks
+    Concurrency      int           `json:"concurrency"`      // Number of workers for load test
+}
+            </div>
+
+            <h3>Core Capabilities</h3>
+            <div class="grid">
+                <div class="card">
+                    <h4>🔧 Configuration Management</h4>
+                    <p>Centralized <code>TestConfig</code> structure controlling Docker, Server, HTTP client, Retry, and Concurrency behavior.</p>
+                </div>
+                <div class="card">
+                    <h4>🐳 Docker Environment</h4>
+                    <p>Automatically starts and stops required services using Docker Compose. Verifies service readiness via TCP port checks.</p>
+                </div>
+                <div class="card">
+                    <h4>🚀 Server Lifecycle</h4>
+                    <p>Launches the backend server as an external process. Waits for availability using a health endpoint and ensures graceful shutdown.</p>
+                </div>
+                <div class="card">
+                    <h4>🌐 HTTP Client Infrastructure</h4>
+                    <p>Optimized HTTP client with connection pooling and timeout tuning. Supports high-concurrency testing with controlled resource usage.</p>
+                </div>
+                <div class="card">
+                    <h4>🔁 Retry & Fault Tolerance</h4>
+                    <p>Implements exponential backoff with jitter for unstable operations. Retries environment setup and transient failures automatically.</p>
+                </div>
+            </div>
+
+            <h3>Test Coverage</h3>
+            <div class="test-category">
+                <h4>Health & Readiness</h4>
+                <div class="checklist-item">Validates /health endpoint structure and status.</div>
+                <div class="checklist-item">Ensures service is operational before executing other tests.</div>
+            </div>
+            <div class="test-category">
+                <h4>User API Validation</h4>
+                <div class="checklist-item">Retrieves user lists and creates users with valid/invalid payloads.</div>
+                <div class="checklist-item">Handles non-existent resource requests gracefully.</div>
+            </div>
+            <div class="test-category">
+                <h4>Concurrent Load Testing</h4>
+                <div class="checklist-item">Executes multiple simultaneous requests to detect race conditions.</div>
+                <div class="checklist-item">Uses configurable worker pools for controlled stress testing.</div>
+            </div>
+
+            <!-- NEW DETAILED SECTION -->
+            <h3 style="margin-top: 3rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">Internal Architecture: The Testutils Toolkit</h3>
+            <p style="margin-bottom: 2rem;">A production-grade Go testing toolkit that unifies structured logging, deterministic integer testing, network diagnostics, and transactional test data management into a single, concurrency-safe framework.</p>
+            
+            <div class="grid">
+                <!-- 1. Structured Test Logger -->
+                <div class="card">
+                    <h4>📝 Structured Test Logger</h4>
+                    <p>A thread-safe, structured logger designed for test environments. Implements atomic log sequencing and caller tracking (file:line).</p>
+                    <div style="margin-top: 1rem;">
+                        <span class="badge badge-gray">Levels: TRACE-FATAL</span>
+                        <span class="badge badge-gray">JSON/Plain Text</span>
+                    </div>
+                </div>
+
+                <!-- 2. Integer Testing Utilities -->
+                <div class="card">
+                    <h4>🔢 Integer Utilities</h4>
+                    <p>Rich numeric subsystem with random generation (seeded for reproducibility) and full statistical analysis.</p>
+                    <ul style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--secondary);">
+                        <li>Validation & Composite Error Reporting</li>
+                        <li>Statistics: Mean, Median, Variance, Std-Dev, Quartiles</li>
+                        <li>Number Theory: Prime checks, Factorization</li>
+                    </ul>
+                </div>
+
+                <!-- 3. Port & Network Diagnostics -->
+                <div class="card">
+                    <h4>🌐 Network Diagnostics</h4>
+                    <p>Validate service readiness with TCP/UDP checks. Supports IPv4/IPv6, context-aware cancellation, and latency measurement.</p>
+                    <div style="margin-top: 1rem;">
+                        <span class="badge badge-gray">Retry Logic</span>
+                        <span class="badge badge-gray">Configurable Jitter</span>
+                    </div>
+                </div>
+
+                <!-- 4. Test Data Manager -->
+                <div class="card">
+                    <h4>📁 Test Data Manager</h4>
+                    <p>Isolated, secure file-system management. Features strict path sanitization (Zip-Slip protection) and atomic file creation.</p>
+                    <ul style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--secondary);">
+                        <li>Per-test sandboxed directories</li>
+                        <li>JSON & Text support</li>
+                        <li>Thread-safe access</li>
+                    </ul>
+                </div>
+
+                <!-- 5. Transactional Cleanup -->
+                <div class="card" style="border-color: var(--warning);">
+                    <h4>↩️ Transactional Cleanup</h4>
+                    <p>Database-like transactions for filesystem state. Ideal for reversible mutations.</p>
+                    <div class="code-block" style="padding: 0.5rem; font-size: 0.75rem; margin-top: 0.5rem;">
+TransactionalCleanup()
+├── Snapshot (Backup)
+├── Mutate Files
+└── Rollback() OR Commit()
+                    </div>
+                </div>
+
+                <!-- 6. Safety Guarantees -->
+                <div class="card" style="border-color: var(--danger);">
+                    <h4>🔒 Concurrency & Safety</h4>
+                    <p>Extensive use of <code>sync.Mutex</code>, <code>RWMutex</code>, and atomic counters. Designed to prevent race conditions in parallel execution.</p>
+                    <div style="margin-top: 1rem;">
+                        <span class="badge badge-red">Race Condition Free</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Purpose & Use Cases</h3>
+            <div class="grid" style="margin-top: 1rem;">
+                <div class="card" style="text-align: center;">
+                    <span style="font-size: 1.5rem;">🔚</span>
+                    <h4 style="margin-top: 0.5rem;">End-to-end API testing</h4>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <span style="font-size: 1.5rem;">🔄</span>
+                    <h4 style="margin-top: 0.5rem;">CI/CD pipelines</h4>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <span style="font-size: 1.5rem;">🔗</span>
+                    <h4 style="margin-top: 0.5rem;">Microservice validation</h4>
+                </div>
+                <div class="card" style="text-align: center;">
+                    <span style="font-size: 1.5rem;">🛡️</span>
+                    <h4 style="margin-top: 0.5rem;">Backend reliability verification</h4>
+                </div>
+            </div>
+        </section>
+
+      
+    </main>
+
+    <script>
+        // 1. Reading Progress Bar
+        window.onscroll = function() {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let scrolled = (winScroll / height) * 100;
+            document.getElementById("progressBar").style.width = scrolled + "%";
+            highlightSidebar();
+        };
+
+        // 2. Mobile Menu Toggle
+        function toggleMobileMenu() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+        }
+
+        // 3. Sidebar Highlighting (Scroll Spy)
+        function highlightSidebar() {
+            const sections = document.querySelectorAll("section");
+            const navLinks = document.querySelectorAll("nav a");
+            let current = "";
+
+            sections.forEach((section) => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= (sectionTop - 150)) {
+                    current = section.getAttribute("id");
+                }
+            });
+
+            navLinks.forEach((a) => {
+                a.classList.remove("active");
+                if (a.getAttribute("href").includes(current)) {
+                    a.classList.add("active");
+                }
+            });
+        }
+
+        // 4. Interactive Port Checker Simulation
+        async function runPortCheck() {
+            const host = document.getElementById('hostInput').value || 'localhost';
+            const port = document.getElementById('portInput').value || '80';
+            const logArea = document.getElementById('checkerLog');
+            
+            // Clear previous logs
+            logArea.innerHTML = '';
+            
+            const addLog = (msg, type = 'info') => {
+                const div = document.createElement('div');
+                div.className = `log-entry log-${type}`;
+                div.textContent = `> ${msg}`;
+                logArea.appendChild(div);
+                logArea.scrollTop = logArea.scrollHeight;
+            };
+
+            addLog(`Initializing connection to ${host}:${port}...`, 'info');
+            
+            // Simulation Logic mimicking Go Port Checker behavior (Retry Logic)
+            const maxRetries = 2;
+            const baseDelay = 300;
+            
+            let success = false;
+            
+            for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                if (attempt > 0) {
+                    addLog(`Attempt ${attempt + 1}...`, 'info');
+                }
+
+                // Simulate network delay (randomized)
+                const latency = Math.floor(Math.random() * 100) + 50; 
+                await new Promise(r => setTimeout(r, 600)); // UI delay for realism
+                
+                // Randomly determine success (simulation only - browser JS can't raw TCP)
+                // In a real app using WebSocket/WebRTC, we'd check actual connection.
+                // Here we assume port 80, 443, 3000, 27017 might be "open" for demo purposes.
+                const isOpen = [80, 443, 3000, 5432, 27017, 6379].includes(parseInt(port));
+
+                if (isOpen) {
+                    addLog(`Connection established! Latency: ${latency}ms`, 'success');
+                    addLog(`Service Detected: ${detectService(port)}`, 'success');
+                    success = true;
+                    break;
+                } else {
+                    addLog(`Connection refused (Timeout: ${latency}ms)`, 'error');
+                    if (attempt < maxRetries) {
+                        addLog(`Retrying in ${baseDelay}ms...`, 'warning');
+                        await new Promise(r => setTimeout(r, baseDelay));
+                    }
+                }
+            }
+
+            if (!success) {
+                addLog(`Failed to connect to ${host}:${port} after ${maxRetries + 1} attempts.`, 'error');
+            }
+        }
+
+        function detectService(port) {
+            const services = {
+                21: 'FTP', 22: 'SSH', 80: 'HTTP', 443: 'HTTPS',
+                3306: 'MySQL', 5432: 'PostgreSQL', 27017: 'MongoDB',
+                6379: 'Redis', 3000: 'Node.js'
+            };
+            return services[port] || 'Unknown Service';
+        }
+    </script>
+</body>
+</html>
