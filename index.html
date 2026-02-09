@@ -231,6 +231,16 @@
             color: var(--primary-dark);
         }
 
+        .math-block {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-left: 4px solid var(--primary);
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+        }
+
         /* --- Robustness Section Specifics --- */
         .robustness-tag {
             background: #fff7ed;
@@ -278,6 +288,7 @@
                 <div class="nav-group-title">Simulation & Integration</div>
                 <ul>
                     <li><a href="#cityflow">CityFlow Integration</a></li>
+                    <li><a href="#sumo">🚦 SUMO Compatibility</a></li>
                     <li><a href="#workflow">Experiment Workflow</a></li>
                     <li><a href="#metrics">Metrics & Evaluation</a></li>
                 </ul>
@@ -287,6 +298,7 @@
                 <ul>
                     <li><a href="#robustness">📊 Robustness Experiments</a></li>
                     <li><a href="#rl-loop">RL Control Loop</a></li>
+                    <li><a href="#marl">🕸️ Multi-Agent RL (MARL)</a></li>
                     <li><a href="#comparison">Control Strategy Comparison</a></li>
                     <li><a href="#results">Results & Analysis</a></li>
                 </ul>
@@ -305,7 +317,7 @@
         <!-- SECTION 1: OVERVIEW & OBJECTIVES -->
         <section id="overview">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-                <span class="badge">v2.1.0 Enterprise</span>
+                <span class="badge">v2.2.0 Enterprise</span>
                 <span class="badge" style="background: #ecfdf5; color: var(--success); border-color: #d1fae5;">MIT License</span>
             </div>
             
@@ -318,8 +330,12 @@
                     <p>Go-based load generation capable of 50k+ req/sec simulation, ensuring APIs can handle peak city-scale traffic.</p>
                 </div>
                 <div class="card">
-                    <h4>RL Native</h4>
-                    <p>Standardized Reward/State interfaces for Gym-like interaction, supporting DQN, PPO, and A2C algorithms.</p>
+                    <h4>Multi-Simulator</h4>
+                    <p>Unified abstraction layer supporting CityFlow and SUMO via TraCI for cross-validation.</p>
+                </div>
+                <div class="card">
+                    <h4>MARL Ready</h4>
+                    <p>Native support for Multi-Agent Reinforcement Learning with cooperative reward structures.</p>
                 </div>
                 <div class="card">
                     <h4>Fault Injection</h4>
@@ -341,7 +357,7 @@
         <!-- SECTION 2: ARCHITECTURE -->
         <section id="architecture">
             <h2>System Architecture</h2>
-            <p>The system integrates Node.js for orchestration, Go for load generation, and CityFlow for simulation logic.</p>
+            <p>The system integrates Node.js for orchestration, Go for load generation, and supports multiple simulation backends via a unified interface.</p>
             
             <div class="ascii-diagram">
 ┌──────────────┐     REST / gRPC     ┌──────────────────┐
@@ -352,8 +368,8 @@
         │ Metrics / Events                     │
         │                                      ▼
 ┌──────────────┐                    ┌──────────────────┐
-│ CityFlow /   │ ◀───────────────── │ Simulation       │
-│ Traffic Sim  │   Control Actions  │ Services         │
+│   Simulators │ ◀───────────────── │ Simulation       │
+│ (City/SUMO)  │   Control Actions  │ Services         │
 └──────────────┘                    └──────────────────┘
         │
         ▼
@@ -378,12 +394,12 @@
                     <p>Traffic entities (Vehicle, Lane), flow/density models, and scenario definitions.</p>
                 </div>
                 <div class="card">
-                    <h4><span class="code-block">go/</span></h4>
-                    <p>High-throughput traffic event generators and performance monitoring tools.</p>
+                    <h4><span class="code-block">src/adapters</span></h4>
+                    <p><strong>New:</strong> Abstract simulator interfaces for CityFlow and TraCI (SUMO).</p>
                 </div>
                 <div class="card">
-                    <h4><span class="code-block">tests/</span></h4>
-                    <p>Deterministic unit tests, CityFlow integration tests, and end-to-end validation.</p>
+                    <h4><span class="code-block">go/</span></h4>
+                    <p>High-throughput traffic event generators and performance monitoring tools.</p>
                 </div>
             </div>
         </section>
@@ -459,24 +475,67 @@
             </table>
         </section>
 
-        <!-- SECTION 6: WORKFLOW -->
+        <!-- SECTION 6: SUMO COMPATIBILITY (NEW) -->
+        <section id="sumo">
+            <h2>Multi-Simulator Support (SUMO)</h2>
+            <p>To address simulator dependency, we introduce an <strong>Abstraction Layer</strong>. This allows the same RL algorithms and API workloads to run on <strong>SUMO (Simulation of Urban MObility)</strong> without code changes in the control logic.</p>
+
+            <div class="ascii-diagram">
+┌─────────────────────────────────────────┐
+│         Experiment Orchestrator         │
+│         (Node.js / Python SDK)          │
+└──────────────────┬──────────────────────┘
+                   │ (Standardized Interface)
+┌──────────────────▼──────────────────────┐
+│      Simulator Adapter Interface       │
+│  - get_state(lane_id)                  │
+│  - set_phase(intersection_id, phase)   │
+│  - step()                              │
+└─────┬──────────────────────┬───────────┘
+      │                      │
+┌─────▼───────┐      ┌──────▼────────┐
+│ CityFlow    │      │  SUMO Adapter │
+│ Adapter     │      │  (TraCI)      │
+└─────┬───────┘      └──────┬────────┘
+      │                     │
+┌─────▼───────┐      ┌──────▼────────┐
+│ CityFlow    │      │  SUMO Engine  │
+│ Engine      │      │  (sumo-gui)   │
+└─────────────┘      └───────────────┘
+            </div>
+
+            <h3>TraCI Integration</h3>
+            <p>The SUMO adapter communicates via the <strong>TraCI</strong> (Traffic Control Interface) protocol. The platform handles:</p>
+            <ul>
+                <li><strong>Coordinate Transformation:</strong> Converting SUMO Cartesian coordinates to lane-based logic.</li>
+                <li><strong>Phase Mapping:</strong> Translating SUMO traffic light programs (TLS) to discrete phase indices.</li>
+                <li><strong>Subscription Optimization:</strong> Using TraCI subscriptions to reduce API overhead compared to polling.</li>
+            </ul>
+
+            <h3>Benefit</h3>
+            <p>Researchers can now train a policy in the fast CityFlow engine and deploy/validate it in the highly detailed SUMO environment using the exact same API endpoints.</p>
+        </section>
+
+        <!-- SECTION 7: WORKFLOW -->
         <section id="workflow">
             <h2>Experiment Workflow</h2>
             <p>A standardized pipeline for conducting traffic simulation experiments.</p>
             <div class="ascii-diagram">
 1. Define scenario and traffic demand
    │
-2. Configure simulator and API endpoints
+2. Select Simulator (CityFlow / SUMO)
    │
-3. Run Go-based load and data simulators
+3. Configure API endpoints & Agents
    │
-4. Collect metrics (queue, delay, throughput)
+4. Run Go-based load and data simulators
    │
-5. Export results for statistical analysis
+5. Collect metrics (queue, delay, throughput)
+   │
+6. Export results for statistical analysis
             </div>
         </section>
 
-        <!-- SECTION 7: METRICS -->
+        <!-- SECTION 8: METRICS -->
         <section id="metrics">
             <h2>Metrics & Evaluation</h2>
             <p>The platform supports quantitative evaluation of traffic performance and API stability.</p>
@@ -508,7 +567,7 @@
             </div>
         </section>
 
-        <!-- SECTION 8: ROBUSTNESS (TEMPLATE SPECIFIC) -->
+        <!-- SECTION 9: ROBUSTNESS -->
         <section id="robustness">
             <h2>📊 Robustness & Stress Evaluation</h2>
             <p>Beyond ideal simulation, this platform includes a dedicated <strong>Stress-Testing Suite</strong> to evaluate how controllers handle failures, latency, and missing data.</p>
@@ -594,14 +653,14 @@ SRI = (T_recovery - T_fault) / (Delay_max / Delay_baseline)
             <blockquote><strong>Insight:</strong> While RL performs best in ideal conditions, it is significantly more sensitive to API latency compared to simpler rule-based controllers.</blockquote>
         </section>
 
-        <!-- SECTION 9: RL LOOP -->
+        <!-- SECTION 10: SINGLE AGENT RL LOOP -->
         <section id="rl-loop">
             <h2>Reinforcement Learning Loop</h2>
             <p>The platform natively supports <strong>closed-loop reinforcement learning (RL)</strong> for traffic signal control.</p>
             
             <div class="ascii-diagram">
 ┌─────────────┐
-│  Simulator  │  (CityFlow)
+│  Simulator  │  (CityFlow / SUMO)
 └──────┬──────┘
        │ State: queue, speed, density
        ▼
@@ -650,7 +709,49 @@ SRI = (T_recovery - T_fault) / (Delay_max / Delay_baseline)
             </div>
         </section>
 
-        <!-- SECTION 10: COMPARISON -->
+        <!-- SECTION 11: MARL (NEW) -->
+        <section id="marl">
+            <h2>🕸️ Multi-Agent Reinforcement Learning (MARL)</h2>
+            <p>For city-scale control, we support <strong>Multi-Agent RL</strong> where each intersection acts as an independent agent. We utilize a <strong>Centralized Training, Decentralized Execution (CTDE)</strong> paradigm (e.g., MAPPO or MADDPG).</p>
+
+            <h3>Cooperative Architecture</h3>
+            <div class="ascii-diagram">
+         [ Global Critic / Value Network ]
+                      ▲
+                      | (Gradient Feedback)
+        ┌─────────────┼──────────────┐
+        │             │              │
+   [Agent A]     [Agent B]      [Agent C]
+ (Intersection) (Intersection) (Intersection)
+        │             │              │
+        └──────┬──────┴──────┬───────┘
+               │             │
+         [Communication /  Partial Observ.]
+          Feature Sharing
+            </div>
+
+            <h3>Mathematical Formulation</h3>
+            
+            <div class="math-block">
+                <strong>1. Joint Action Space</strong><br>
+                At time step <i>t</i>, the joint action <b>a</b> taken by <i>N</i> agents is:<br>
+                <b>a</b><sup>t</sup> = ( a<sub>1</sub><sup>t</sup>, a<sub>2</sub><sup>t</sup>, ..., a<sub>N</sub><sup>t</sup> )
+            </div>
+
+            <div class="math-block">
+                <strong>2. Shared Global Reward</strong><br>
+                To promote cooperation, agents optimize a global reward function <i>R</i><sub>total</sub> rather than local rewards. This mitigates the "greedy agent" problem where one intersection clears its queue by pushing traffic to a neighbor.<br><br>
+                <i>R</i><sub>total</sub>(<b>s</b>, <b>a</b>) = &sum;<sub>i=1</sub><sup>N</sup> ( &alpha; &middot; Delay<sub>i</sub> + &beta; &middot; Queue<sub>i</sub> + &gamma; &middot; Stop<sub>i</sub> )
+            </div>
+
+            <div class="math-block">
+                <strong>3. Centralized Critic Update (MAPPO Style)</strong><br>
+                During training, a centralized critic <i>V</i><sub>&phi;</sub>(<b>o</b>, <b>a</b>) estimates the value of the joint state and action, providing stable gradients for decentralized policy updates.<br><br>
+                &nabla;<sub>&theta;</sub> <i>J</i>(&theta;) = &E;<sub>(&tau;, &pi;<sub>&theta;</sub>)</sub>[ &sum;<sub>t</sub> &nabla;<sub>&theta;</sub> log &pi;<sub>&theta;</sub>( a<sub>i</sub><sup>t</sup> | o<sub>i</sub><sup>t</sup> ) &middot; <i>A</i><sub>i</sub>(<b>o</b><sup>t</sup>, <b>a</b><sup>t</sup>) ]
+            </div>
+        </section>
+
+        <!-- SECTION 12: COMPARISON -->
         <section id="comparison">
             <h2>Control Strategy Comparison</h2>
             <p>Systematic comparison of three major traffic signal control paradigms.</p>
@@ -700,7 +801,7 @@ SRI = (T_recovery - T_fault) / (Delay_max / Delay_baseline)
                         <td>Medium</td>
                     </tr>
                     <tr>
-                        <td><strong>RL-Based</strong></td>
+                        <td><strong>RL-Based (MARL)</strong></td>
                         <td><strong>28.9</strong></td>
                         <td><strong>10.2</strong></td>
                         <td><strong>2150</strong></td>
@@ -710,7 +811,7 @@ SRI = (T_recovery - T_fault) / (Delay_max / Delay_baseline)
             </table>
         </section>
 
-        <!-- SECTION 11: RESULTS -->
+        <!-- SECTION 13: RESULTS -->
         <section id="results">
             <h2>Results & Analysis</h2>
             <p>The platform produces <strong>publication-ready experimental results</strong>. Below is an example of an experiment comparing a Baseline Controller against an RL Controller.</p>
@@ -769,19 +870,12 @@ SRI = (T_recovery - T_fault) / (Delay_max / Delay_baseline)
             </ul>
         </section>
 
-        <!-- SECTION 12: LIMITATIONS & FUTURE -->
+        <!-- SECTION 14: LIMITATIONS & FUTURE -->
         <section id="limitations">
             <h2>Limitations & Future Work</h2>
             
             <h3>Current Limitations</h3>
             <div class="grid">
-                <div class="card">
-                    <h4>Simulator Dependency</h4>
-                    <p>Tightly coupled to CityFlow. Limits portability to SUMO or VISSIM without abstraction layers.</p>
-                    <div class="impact-box">
-                        <small><strong>Impact:</strong> Results may reflect CityFlow-specific dynamics.</small>
-                    </div>
-                </div>
                 <div class="card">
                     <h4>Discrete-Time Assumption</h4>
                     <p>Fixed-step simulation assumes synchronous timing, ignoring real-world jitter and noise.</p>
@@ -809,16 +903,12 @@ SRI = (T_recovery - T_fault) / (Delay_max / Delay_baseline)
             <p>Planned extensions to address these limitations and broaden research impact:</p>
             <div class="grid">
                 <div class="card">
-                    <h4>Simulator-Agnostic Layer</h4>
-                    <p>Generic adapters to switch seamlessly between CityFlow, SUMO, and others.</p>
-                </div>
-                <div class="card">
                     <h4>Asynchronous Control</h4>
                     <p>Modeling variable latency and network-induced delays for real-world accuracy.</p>
                 </div>
                 <div class="card">
-                    <h4>Multi-Agent RL (MARL)</h4>
-                    <p>Coordination across intersections using MADDPG, MAPPO, or GNNs.</p>
+                    <h4>Advanced MARL (GNNs)</h4>
+                    <p>Using Graph Neural Networks to better model topology-aware coordination across intersections.</p>
                 </div>
                 <div class="card">
                     <h4>Robust RL</h4>
@@ -835,7 +925,7 @@ SRI = (T_recovery - T_fault) / (Delay_max / Delay_baseline)
             </div>
         </section>
 
-        <!-- SECTION 13: CITATION -->
+        <!-- SECTION 15: CITATION -->
         <section id="citation">
             <h2>Citation</h2>
             <p>If you use this platform in academic work, please cite it as follows:</p>
@@ -846,7 +936,7 @@ SRI = (T_recovery - T_fault) / (Delay_max / Delay_baseline)
   title  = {Web API Test Platform for Traffic Simulation},
   author = {Ahmed Albreem},
   year   = {2026},
-  note   = {Enterprise-grade framework for ITS and CityFlow research}
+  note   = {Multi-simulator support for CityFlow and SUMO with MARL capabilities}
 }</pre>
             </div>
         </section>
